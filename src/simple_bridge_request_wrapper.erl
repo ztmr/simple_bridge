@@ -150,26 +150,6 @@ parse_deep_post_params([{Key, Value}|Rest], Acc) ->
             parse_deep_post_params(Rest, [{Key, Value}|Acc]);
         {match, [KeyName, Path]} ->
             PathList = re:split(Path, "\\]\\[", [{return, list}]),
-            parse_deep_post_params(Rest, insert_into(Acc, [KeyName|PathList], Value))
+            parse_deep_post_params(Rest, deepprops:set ([KeyName|PathList], Value, Acc))
     end.
 
-insert_into(_List, [], Value) ->
-    Value;
-insert_into(undefined, PathList, Value) ->
-    insert_into([], PathList, Value);
-insert_into(N, PathList, Value) when is_integer(N) ->
-    insert_into([], PathList, Value);
-insert_into(List, [ThisKey|Rest], Value) ->
-    case catch list_to_integer(ThisKey) of
-        {'EXIT', _} ->
-            ExistingVal = proplists:get_value(ThisKey, List),
-            [{ThisKey, insert_into(ExistingVal, Rest, Value)}|
-                proplists:delete(ThisKey, List)];
-        N when N < erlang:length(List) ->
-            ExistingVal = lists:nth(N+1, List),
-            lists:sublist(List, N) ++ [insert_into(ExistingVal, Rest, Value)|
-                lists:nthtail(N+1, List)];
-        N when N >= erlang:length(List) ->
-            List ++ lists:reverse([insert_into(undefined, Rest, Value)|
-                    lists:seq(0, N - erlang:length(List) - 1)])
-    end.
