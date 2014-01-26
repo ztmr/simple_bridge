@@ -7,7 +7,8 @@ parse_deep_post_params_test_ () ->
     Data = [
             {"x", "whatever", [{"x", "whatever"}]},
             {"x[id]", "whatever", [{"x", [{"id", "whatever"}]}]},
-            {"x[id][3]", "whatever", [{"x", [{"id", [{"3", "whatever"}]}]}]}
+            {"x[id][3]", "whatever", [{"x", [{"id", [{"3", "whatever"}]}]}]},
+            {"x[i d][3]", "whatever", [{"x", [{"id", [{"3", "whatever"}]}]}]}
            ],
     [ ?assertEqual (Expect, DummyReq:parse_deep_post_params ([{K, V}], []))
       || {K, V, Expect} <- Data ],
